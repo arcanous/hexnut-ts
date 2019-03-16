@@ -1,7 +1,4 @@
-const {
-  SOCKET_SYMBOL,
-  REQUEST_SYMBOL
-} = require('./symbols');
+import { SOCKET_SYMBOL, REQUEST_SYMBOL } from './symbols';
 
 /**
  * @class
@@ -107,10 +104,18 @@ const ctx = {
 /**
  * @private
  */
-module.exports = (ws, req, app) => Object.assign(Object.create(ctx), {
-  app,
-  type: 'connection',
-  message: null,
-  [SOCKET_SYMBOL]: ws,
-  [REQUEST_SYMBOL]: req,
-});
+// module.exports = (ws, req, app) => Object.assign(Object.create(ctx), {
+//   app,
+//   type: 'connection',
+//   message: null,
+//   [SOCKET_SYMBOL]: ws,
+//   [REQUEST_SYMBOL]: req,
+// });
+
+export default (ws, req, app) => Object.assign(Object.create(ctx), {
+    app,
+    type: 'connection',
+    message: null,
+    [SOCKET_SYMBOL]: ws,
+    [REQUEST_SYMBOL]: req,
+  });

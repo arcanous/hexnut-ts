@@ -1,8 +1,8 @@
-const WebSocket = require('ws');
-const uuid = require('uuid/v4');
-const config = require('./config');
-const createCtx = require('./ctx');
-const {SOCKET_SYMBOL} = require('./symbols');
+import WebSocket from 'ws';
+import { v4 as uuid } from 'uuid';
+import config from './config';
+import createCtx from './ctx';
+import { SOCKET_SYMBOL } from './symbols';
 
 /**
  * @typedef {function(ctx, NextMiddlewareFn)} middleware
@@ -17,7 +17,7 @@ export interface HexnutContext {
 
 export interface HexNutConfig {
   port: number;
-  //..
+  // ..
 }
 
 export type MiddlewareFn = () => any;
@@ -32,7 +32,7 @@ export interface HexnutConnections {
 class HexNut {
 
   config: HexNutConfig;
-  server: WebSocket.Server = null;
+  server = null;
   isRunning = false;
   middleware: MiddlewareFn[] = [];
   connections: HexnutConnections = {};

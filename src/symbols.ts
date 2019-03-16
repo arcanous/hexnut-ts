@@ -1,4 +1,2 @@
-module.exports = {
-  SOCKET_SYMBOL: '@@WebsocketConnection',
-  REQUEST_SYMBOL: '@@WebsocketRequest',
-}
+export const SOCKET_SYMBOL = '@@WebsocketConnection';
+export const REQUEST_SYMBOL = '@@WebsocketRequest';
