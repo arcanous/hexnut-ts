@@ -1,5 +1,4 @@
-import { SOCKET_SYMBOL, REQUEST_SYMBOL } from './symbols';
-import { HexNut } from './hexnut-ts';
+import { HexNut } from './index';
 
 /**
  * @class
