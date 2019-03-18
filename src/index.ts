@@ -1,4 +1,5 @@
 import WebSocket from 'ws';
+import * as http from 'http';
 import * as uuid from 'uuid/v4';
 
 import config from './config';
@@ -57,7 +58,7 @@ export class HexNut {
     this.server = new WebSocket.Server(this.config);
     this.isRunning = true;
 
-    this.server.on('connection', (ws: WebSocket, req: any) => {
+    this.server.on('connection', (ws: WebSocket, req: http.IncomingMessage) => {
       const id: string = 'asdf7858'; // uuid();
       const ctx: Context = new Context(ws, req, this);
       this.connections[id] = ctx;

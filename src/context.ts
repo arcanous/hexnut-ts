@@ -1,3 +1,4 @@
+import * as http from 'http';
 import { HexNut } from './index';
 
 /**
@@ -10,7 +11,7 @@ export class Context {
   message: string | null = null;
   isComplete = false;
 
-  constructor(public ws: any, public req: any, public app: HexNut) {
+  constructor(public ws: any, public req: http.IncomingMessage, public app: HexNut) {
 
   }
 
@@ -84,21 +85,21 @@ export class Context {
   /**
    * IP Address of the client
    */
-  get ip(): string {
+  get ip() {
     return this.req.connection.remoteAddress;
   }
 
   /**
    * String URL path that began the connection
    */
-  get path(): string {
+  get path() {
     return this.req.url;
   }
 
   /**
    * HTTP method used to begin the connection
    */
-  get method(): string {
+  get method() {
     return this.req.method;
   }
 };
