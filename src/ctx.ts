@@ -1,10 +1,11 @@
 import { SOCKET_SYMBOL, REQUEST_SYMBOL } from './symbols';
+import { HexNut } from './hexnut-ts';
 
 /**
  * @class
  * Context object representing a HexNut connection
  */
-const ctx = {
+const ctx: HexNut.Context = {
   /**
    * @private
    */
@@ -19,8 +20,8 @@ const ctx = {
    * @param {*} data
    * @method
    */
-  send(...args) {
-    this[SOCKET_SYMBOL].send(...args);
+  send(data: any, cb?: (err?: Error) => void) {
+    this[SOCKET_SYMBOL].send(data, cb);
     return this;
   },
 
@@ -28,9 +29,9 @@ const ctx = {
    * Send a message to all connected clients
    * @param {*} data
    */
-  sendToAll(...args) {
+  sendToAll(data: any, cb?: (err?: Error) => void): HexNut.Context {
     Object.values(this.app.connections).forEach(ctx =>
-      ctx[SOCKET_SYMBOL].send(...args)
+      ctx[SOCKET_SYMBOL].send(data, cb)
     );
     return this;
   },
@@ -112,7 +113,7 @@ const ctx = {
 //   [REQUEST_SYMBOL]: req,
 // });
 
-export default (ws, req, app) => Object.assign(Object.create(ctx), {
+export default (ws: any, req: any, app: HexNut) => Object.assign(Object.create(ctx), {
     app,
     type: 'connection',
     message: null,

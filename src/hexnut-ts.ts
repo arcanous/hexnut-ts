@@ -1,8 +1,9 @@
 import WebSocket from 'ws';
 import { v4 as uuid } from 'uuid';
+
 import config from './config';
 import createCtx from './ctx';
-import { SOCKET_SYMBOL } from './symbols';
+import { SOCKET_SYMBOL, REQUEST_SYMBOL } from './symbols';
 
 /**
  * @typedef {function(ctx, NextMiddlewareFn)} middleware
@@ -11,21 +12,39 @@ import { SOCKET_SYMBOL } from './symbols';
  * @param {NextMiddlewareFn} next Callback function that triggers the next middleware
  */
 
-export interface HexnutContext {
-  isComplete: boolean;
-  send(): HexnutContext;
-  [SOCKET_SYMBOL]: WebSocket
-}
+export namespace HexNut {
+  export interface Context {
+    type: 'connection' | 'message' | 'type' | 'closing';
+    isComplete: boolean;
+    app: HexNut;
+    message: string | null;
+    isConnection: boolean;
+    isMessage: boolean;
+    isClosing: boolean;
+    _reset(message: string): void;
+    send(data: any, cb?: (err?: Error) => void): Context;
+    sendToAll(data: any, cb?: (err?: Error) => void): Context;
+    done(): Context;
+    throw(err: Error): Error;
+    requestHeaders(): any;
+    ip(): any;
+    path(): any;
+    method(): any;
+    [SOCKET_SYMBOL]: WebSocket;
+    [REQUEST_SYMBOL]: any;
 
-export interface HexNutConfig {
-  port: number;
-  // ..
-}
+  }
 
-export type MiddlewareFn = (ctx: HexnutContext, next: () => any) => any;
+  export interface Config {
+    port: number;
+    // ..
+  }
 
-export interface HexnutConnections {
-  [key: string]: HexnutContext;
+  export type MiddlewareFn = (ctx: Context, next: () => any) => any;
+
+  export interface Connections {
+    [key: string]: Context;
+  }
 }
 
 /**
@@ -33,11 +52,11 @@ export interface HexnutConnections {
  */
 export class HexNut {
 
-  config: HexNutConfig;
+  config: HexNut.Config;
   server: any;
   isRunning = false;
-  middleware: MiddlewareFn[] = [];
-  connections: HexnutConnections = {};
+  middleware: HexNut.MiddlewareFn[] = [];
+  connections: HexNut.Connections = {};
   onerror: any;
 
   /**
@@ -55,7 +74,7 @@ export class HexNut {
   /**
    * Adds a middleware function to the HexNut instance
    */
-  use(middleware: MiddlewareFn) {
+  use(middleware: HexNut.MiddlewareFn) {
     this.middleware.push(middleware);
   }
 
@@ -67,8 +86,8 @@ export class HexNut {
     this.isRunning = true;
 
     this.server.on('connection', (ws: WebSocket, req: any) => {
-      const id = uuid();
-      const ctx = createCtx(ws, req, this);
+      const id: string = uuid();
+      const ctx: HexNut.Context = createCtx(ws, req, this);
       this.connections[id] = ctx;
 
       this.runMiddleware(ctx);
@@ -94,7 +113,7 @@ export class HexNut {
   stop() {
     if (this.isRunning) {
       this.isRunning = false;
-      Object.entries(this.connections).forEach(([id, connection]: [string, HexnutContext]) => {
+      Object.entries(this.connections).forEach(([id, connection]: [string, HexNut.Context]) => {
         connection[SOCKET_SYMBOL].close();
         delete this.connections[id];
       });
@@ -107,7 +126,7 @@ export class HexNut {
    * @param {Error} err
    * @param {Context} ctx
    */
-  onError(err: Error, ctx: HexnutContext) {
+  onError(err: Error, ctx: HexNut.Context) {
     if (typeof this.onerror === 'function') {
       return this.onerror(err, ctx);
     }
@@ -117,11 +136,11 @@ export class HexNut {
    * @private
    * @param {Context} ctx
    */
-  runMiddleware(ctx: HexnutContext) {
-    let i = 0;
-    const run = async (idx: number) => {
+  runMiddleware(ctx: HexNut.Context) {
+    const i = 0;
+    const run = (idx: number): any => {
       if (!ctx.isComplete && typeof this.middleware[idx] === 'function') {
-        return await this.middleware[idx](ctx, () => run(idx+1));
+        return this.middleware[idx](ctx, () => run(idx + 1));
       }
     };
     return run(i).catch((err: Error) => this.onError(err, ctx));
